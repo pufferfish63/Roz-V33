@@ -1,0 +1,213 @@
+-- ROYAL ROZ V1 - Custom Script for King of the Monarch
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
+
+-- Anti-Lag Ultra (no sound mute, but max visual clean)
+local function ultraAntiLag()
+    -- Disable particles & effects
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam") then
+            obj.Enabled = false
+        end
+    end
+
+    -- Lighting minimal
+    Lighting.GlobalShadows = false
+    Lighting.FogEnd = 1e6
+    Lighting.Brightness = 1
+    Lighting.OutdoorAmbient = Color3.new(1,1,1)
+    settings().Rendering.QualityLevel = "Level01"
+    RunService:Set3dRenderingEnabled(true)
+end
+
+-- Basic Aimbot, locks to nearest HumanoidRootPart within 60 studs
+local aimbotEnabled = false
+local AIM_RADIUS = 60
+
+local function getClosestEnemy()
+    local closest, dist = nil, math.huge
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local targetPos = player.Character.HumanoidRootPart.Position
+            local myPos = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character.HumanoidRootPart.Position
+            if myPos then
+                local d = (targetPos - myPos).Magnitude
+                if d < dist and d <= AIM_RADIUS then
+                    dist = d
+                    closest = player
+                end
+            end
+        end
+    end
+    return closest
+end
+
+-- Aura effect: glowy box around local player root part
+local auraBox = nil
+local function toggleAura(state)
+    if state then
+        if not auraBox then
+            auraBox = Instance.new("SelectionBox")
+            auraBox.Adornee = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            auraBox.Color3 = Color3.fromRGB(255, 215, 0) -- royal gold
+            auraBox.LineThickness = 0.12
+            auraBox.Parent = workspace
+        end
+    else
+        if auraBox then
+            auraBox:Destroy()
+            auraBox = nil
+        end
+    end
+end
+
+-- UI Setup
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "RoyalRozV1UI"
+ScreenGui.Parent = game.CoreGui
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 320, 0, 420)
+MainFrame.Position = UDim2.new(0, 20, 0, 80)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.BackgroundTransparency = 0.2
+MainFrame.BorderSizePixel = 0
+MainFrame.Parent = ScreenGui
+
+-- Goku Image header (with some swag)
+local GokuImage = Instance.new("ImageLabel")
+GokuImage.Size = UDim2.new(0, 70, 0, 70)
+GokuImage.Position = UDim2.new(0, 10, 0, 10)
+GokuImage.BackgroundTransparency = 1
+GokuImage.Image = "rbxassetid://11764264685"
+GokuImage.Parent = MainFrame
+
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Size = UDim2.new(1, -90, 0, 70)
+TitleLabel.Position = UDim2.new(0, 90, 0, 10)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Text = "ROYAL ROZ V1"
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextSize = 28
+TitleLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+TitleLabel.Parent = MainFrame
+
+local CreditLabel = Instance.new("TextLabel")
+CreditLabel.Size = UDim2.new(1, -20, 0, 40)
+CreditLabel.Position = UDim2.new(0, 10, 1, -50)
+CreditLabel.BackgroundTransparency = 1
+CreditLabel.Text = "Warning: Don't abuse! Credit to ROZ & King Monarch"
+CreditLabel.Font = Enum.Font.GothamBold
+CreditLabel.TextSize = 14
+CreditLabel.TextColor3 = Color3.fromRGB(255,255,255)
+CreditLabel.TextWrapped = true
+CreditLabel.TextXAlignment = Enum.TextXAlignment.Center
+CreditLabel.TextYAlignment = Enum.TextYAlignment.Center
+CreditLabel.Parent = MainFrame
+
+-- Toggle helper function
+local function createToggle(text, posY, default, callback)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, -20, 0, 40)
+    frame.Position = UDim2.new(0, 10, 0, posY)
+    frame.BackgroundTransparency = 0.5
+    frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    frame.BorderSizePixel = 0
+    frame.Parent = MainFrame
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0.7, 0, 1, 0)
+    label.Position = UDim2.new(0, 10, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.TextColor3 = Color3.fromRGB(255,255,255)
+    label.Font = Enum.Font.GothamSemibold
+    label.TextSize = 18
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = frame
+
+    local toggleBtn = Instance.new("TextButton")
+    toggleBtn.Size = UDim2.new(0, 60, 0, 30)
+    toggleBtn.Position = UDim2.new(1, -70, 0, 5)
+    toggleBtn.BackgroundColor3 = default and Color3.fromRGB(34,139,34) or Color3.fromRGB(184,134,11)
+    toggleBtn.Text = default and "ON" or "OFF"
+    toggleBtn.Font = Enum.Font.GothamBold
+    toggleBtn.TextColor3 = Color3.new(1,1,1)
+    toggleBtn.TextSize = 16
+    toggleBtn.Parent = frame
+
+    local toggled = default
+
+    toggleBtn.MouseButton1Click:Connect(function()
+        toggled = not toggled
+        toggleBtn.BackgroundColor3 = toggled and Color3.fromRGB(34,139,34) or Color3.fromRGB(184,134,11)
+        toggleBtn.Text = toggled and "ON" or "OFF"
+        callback(toggled)
+    end)
+
+    return frame, toggleBtn
+end
+
+-- Toggles
+local fpsBoost = false
+local antiLag = true
+local aura = false
+
+createToggle("FPS Boost 60 / 90", 90, fpsBoost, function(state)
+    fpsBoost = state
+    if fpsBoost then
+        settings().Rendering.QualityLevel = "Level02" -- 90fps
+    else
+        settings().Rendering.QualityLevel = "Level01" -- 60fps
+    end
+end)
+
+createToggle("Extreme AntiLag", 140, antiLag, function(state)
+    antiLag = state
+    if antiLag then
+        ultraAntiLag()
+    else
+        -- Restore default lighting settings
+        Lighting.GlobalShadows = true
+        Lighting.FogEnd = 1000
+        Lighting.Brightness = 2
+        Lighting.OutdoorAmbient = Color3.new(0.5,0.5,0.5)
+        RunService:Set3dRenderingEnabled(true)
+        settings().Rendering.QualityLevel = "Level03"
+    end
+end)
+
+createToggle("Aura Effect", 190, aura, function(state)
+    aura = state
+    toggleAura(aura)
+end)
+
+-- Aimbot toggle
+local aimbotToggle = false
+createToggle("Aimbot", 240, aimbotToggle, function(state)
+    aimbotToggle = state
+end)
+
+-- Main Loop
+RunService.Heartbeat:Connect(function()
+    if antiLag then
+        ultraAntiLag()
+    end
+
+    if aimbotToggle then
+        local target = getClosestEnemy()
+        if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+            local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if root then
+                -- Aim at target smoothly by moving mouse hit (hacky)
+                local targetPos = target.Character.HumanoidRootPart.Position
+                Mouse.Hit = CFrame.new(targetPos)
+            end
+        end
+    end
+end)
