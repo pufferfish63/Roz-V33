@@ -1,0 +1,106 @@
+-- ROZ V3 - Blox Fruits Hack Panel | UI like RedzHub | Credits: ROZ & King Monarch
+
+local codes = {
+    "SECRET_ADMIN", "KITT_RESET", "Sub2Fer999", "Enyu_is_Pro",
+    "Magicbus", "JCWK", "Starcodeheo", "Bluxxy", "fudd10_v2",
+    "FUDD10", "Sub2OfficialNoobie", "TheGreatAce", "Axiore",
+    "TantaiGaming", "StrawHatMaine", "Sub2Daigrock", "Sub2UncleKizaru",
+    "Bignews", "Sub2NoobMaster123", "Sub2CaptainMaui", "Sub2GamerRobot_Reset1",
+    "Sub2GamerRobot_Exp1", "ADMIN_TROLL", "DRAGONABUSE", "DEVSCOOKING"
+}
+
+local autoAttack = false
+
+-- UI Setup
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.Name = "ROZBF_UI"
+
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0, 300, 0, 250)
+main.Position = UDim2.new(0.35, 0, 0.3, 0)
+main.BackgroundColor3 = Color3.fromRGB(25,25,25)
+main.BorderSizePixel = 0
+main.Active = true
+main.Draggable = true
+
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1, 0, 0, 30)
+title.Text = "ROZ V3 - Blox Fruits Panel"
+title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.GothamBold
+title.TextScaled = true
+
+local redeemBtn = Instance.new("TextButton", main)
+redeemBtn.Position = UDim2.new(0.1, 0, 0.2, 0)
+redeemBtn.Size = UDim2.new(0.8, 0, 0.15, 0)
+redeemBtn.Text = "Redeem All Codes"
+redeemBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+redeemBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+redeemBtn.Font = Enum.Font.Gotham
+redeemBtn.TextScaled = true
+
+redeemBtn.MouseButton1Click:Connect(function()
+    for _, code in pairs(codes) do
+        pcall(function()
+            game:GetService("ReplicatedStorage").Remotes.Redeem:InvokeServer(code)
+        end)
+    end
+    redeemBtn.Text = "✔ Done!"
+    wait(2)
+    redeemBtn.Text = "Redeem All Codes"
+end)
+
+local attackToggle = Instance.new("TextButton", main)
+attackToggle.Position = UDim2.new(0.1, 0, 0.4, 0)
+attackToggle.Size = UDim2.new(0.8, 0, 0.15, 0)
+attackToggle.Text = "Auto Attack: OFF"
+attackToggle.BackgroundColor3 = Color3.fromRGB(200, 150, 0)
+attackToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+attackToggle.Font = Enum.Font.Gotham
+attackToggle.TextScaled = true
+
+attackToggle.MouseButton1Click:Connect(function()
+    autoAttack = not autoAttack
+    attackToggle.Text = "Auto Attack: " .. (autoAttack and "ON" or "OFF")
+end)
+
+local fakeMoneyBtn = Instance.new("TextButton", main)
+fakeMoneyBtn.Position = UDim2.new(0.1, 0, 0.6, 0)
+fakeMoneyBtn.Size = UDim2.new(0.8, 0, 0.15, 0)
+fakeMoneyBtn.Text = "Spawn $999M (Visual)"
+fakeMoneyBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 200)
+fakeMoneyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+fakeMoneyBtn.Font = Enum.Font.Gotham
+fakeMoneyBtn.TextScaled = true
+
+fakeMoneyBtn.MouseButton1Click:Connect(function()
+    game.Players.LocalPlayer.PlayerGui:FindFirstChild("Main").Stats.Cash.Text = "$999,999,999"
+end)
+
+local closeBtn = Instance.new("TextButton", main)
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(0.9, 0, 0, 0)
+closeBtn.Text = "X"
+closeBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextScaled = true
+
+closeBtn.MouseButton1Click:Connect(function()
+    gui:Destroy()
+end)
+
+-- Auto attack logic
+spawn(function()
+    while true do
+        wait(0.1)
+        if autoAttack then
+            pcall(function()
+                game:GetService("VirtualInputManager"):SendKeyEvent(true, "Z", false, game)
+                wait(0.2)
+                game:GetService("VirtualInputManager"):SendKeyEvent(false, "Z", false, game)
+            end)
+        end
+    end
+end)
